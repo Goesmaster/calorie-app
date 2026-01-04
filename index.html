@@ -58,7 +58,14 @@
   <p><strong>Totaal:</strong> <span id="total">0</span> kcal</p>
   <p class="small" id="remaining"></p>
 </div>
-
+<div class="card">
+  <strong>Lichte beweging</strong>
+  <button onclick="addBurn(40)">🚶 10 min wandelen</button>
+  <button onclick="addBurn(30)">🧹 10 min huishouden</button>
+  <button onclick="addBurn(20)">🧘 10 min stretchen</button>
+  <button onclick="addBurn(50)">🚴 10 min fietsen</button>
+  <p class="small">Verbrand: <span id="burned">0</span> kcal</p>
+</div>
 <div class="card">
   <strong>Instellen (eenmalig)</strong>
   <input id="age" type="number" placeholder="Leeftijd">
@@ -73,7 +80,13 @@
 
 <script>
 let foods = JSON.parse(localStorage.getItem("foods") || "[]");
+let burned = Number(localStorage.getItem("burned") || 0);
 let goal = localStorage.getItem("goal");
+function addBurn(cal) {
+  burned += cal;
+  localStorage.setItem("burned", burned);
+  render();
+}
 
 function render() {
   const list = document.getElementById("foodList");
@@ -87,12 +100,14 @@ function render() {
     total += f.cal;
   });
 
-  document.getElementById("total").textContent = total;
-  if (goal) {
-    document.getElementById("goal").textContent = goal + " kcal";
-    document.getElementById("remaining").textContent =
-      "Resterend: " + (goal - total) + " kcal";
-  }
+document.getElementById("total").textContent = total;
+document.getElementById("burned").textContent = burned;
+
+if (goal) {
+  document.getElementById("goal").textContent = goal + " kcal";
+  document.getElementById("remaining").textContent =
+    "Netto: " + (goal - total + burned) + " kcal";
+}
 }
 
 function addFood() {
