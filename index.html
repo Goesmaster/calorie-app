@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mijn rustige calorie-app</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: #f6f7f5;
+      color: #333;
+      padding: 20px;
+      max-width: 420px;
+      margin: auto;
+    }
+    h1 { font-size: 1.4em; }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      font-size: 1em;
+    }
+    button {
+      background: #7da48b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+    ul { padding-left: 18px; }
+    .small { font-size: 0.9em; color: #666; }
+  </style>
+</head>
+<body>
+
+<h1>🌱 Mijn dag</h1>
+
+<div class="card">
+  <strong>Jouw dagdoel</strong>
+  <p id="goal">Nog niet ingesteld</p>
+</div>
+
+<div class="card">
+  <strong>Eten toevoegen</strong>
+  <input id="foodName" placeholder="Wat heb je gegeten?">
+  <input id="foodCalories" type="number" placeholder="Calorieën">
+  <button onclick="addFood()">Toevoegen</button>
+</div>
+
+<div class="card">
+  <strong>Vandaag</strong>
+  <ul id="foodList"></ul>
+  <p><strong>Totaal:</strong> <span id="total">0</span> kcal</p>
+  <p class="small" id="remaining"></p>
+</div>
+
+<div class="card">
+  <strong>Instellen (eenmalig)</strong>
+  <input id="age" type="number" placeholder="Leeftijd">
+  <input id="weight" type="number" placeholder="Gewicht (kg)">
+  <input id="height" type="number" placeholder="Lengte (cm)">
+  <select id="gender">
+    <option value="female">Vrouw</option>
+    <option value="male">Man</option>
+  </select>
+  <button onclick="calculateGoal()">Bereken dagdoel</button>
+</div>
+
+<script>
+let foods = JSON.parse(localStorage.getItem("foods") || "[]");
+let goal = localStorage.getItem("goal");
+
+function render() {
+  const list = document.getElementById("foodList");
+  list.innerHTML = "";
+  let total = 0;
+
+  foods.forEach(f => {
+    const li = document.createElement("li");
+    li.textContent = `${f.name} – ${f.cal} kcal`;
+    list.appendChild(li);
+    total += f.cal;
+  });
+
+  document.getElementById("total").textContent = total;
+  if (goal) {
+    document.getElementById("goal").textContent = goal + " kcal";
+    document.getElementById("remaining").textContent =
+      "Resterend: " + (goal - total) + " kcal";
+  }
+}
+
+function addFood() {
+  const name = foodName.value;
+  const cal = Number(foodCalories.value);
+  if (!name || !cal) return;
+  foods.push({ name, cal });
+  localStorage.setItem("foods", JSON.stringify(foods));
+  foodName.value = "";
+  foodCalories.value = "";
+  render();
+}
+
+function calculateGoal() {
+  const age = age.value;
+  const weight = weight.value;
+  const height = height.value;
+  const gender = document.getElementById("gender").value;
+
+  let bmr;
+  if (gender === "male") {
+    bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  } else {
+    bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+  }
+
+  goal = Math.round(bmr * 1.4 - 300); // mild calorietekort
+  localStorage.setItem("goal", goal);
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
